@@ -1,0 +1,25 @@
+[package]
+name = "friendhub-live"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = "0.7.4"
+log = "0.4.20"
+serde = "1.0.195"
+serde_json = "1.0.111"
+socketioxide = { version = "0.10.1", features = [ "extensions" ] }
+tokio = { version = "1.35.1", features = [ "rt-multi-thread" ] }
+uuid = "1.7.0"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+enum_glob_use = "deny"
+pedantic = "deny"
+# nursery = "deny"
+unwrap_used = "deny"
+option_if_let_else = "allow"
