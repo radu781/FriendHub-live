@@ -3,8 +3,8 @@ use chat::handler::namespace::on_chat_ns_joined;
 use socketioxide::SocketIo;
 
 mod chat;
-mod utils;
 mod notifications;
+mod utils;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
