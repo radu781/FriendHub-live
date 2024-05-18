@@ -1,7 +1,6 @@
-use std::thread;
-
 use axum::routing::get;
 use chat::handler::namespace::on_chat_ns_joined;
+use log::debug;
 use notifications::{notif::VotingServer, notif::VotingService};
 use socketioxide::SocketIo;
 use tonic::transport::Server;
@@ -22,7 +21,6 @@ async fn setup_socketio() {
         .await
         .expect("bind");
     axum::serve(listener, app).await.expect("serve");
-
 }
 
 async fn setup_grpc() {

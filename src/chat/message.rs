@@ -1,24 +1,14 @@
-use log::error;
-use serde::Deserialize;
+use database::Message;
+use log::{debug, error};
 
-use crate::utils::UuidWrapper;
-
-// #[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
-// pub struct User {
-//     pub id: UuidWrapper,
-// }
-
-#[derive(Deserialize)]
-pub struct Message {
-    pub from: UuidWrapper,
-    pub to_user: Option<UuidWrapper>,
-    pub to_group: Option<Vec<UuidWrapper>>,
-    pub text: String,
+pub(crate) trait SocketSendable {
+    fn room_name(&self) -> Option<String>;
 }
 
-impl Message {
-    pub fn room_name(&self) -> Option<String> {
-        match (self.to_user, self.to_group.clone()) {
+impl SocketSendable for Message {
+    fn room_name(&self) -> Option<String> {
+        debug!("in room_name");
+        match (self.to_user.clone(), self.to_group.clone()) {
             (None, None) => {
                 error!(
                     "both `to_user` and `to_group` were null, from: {}",
@@ -26,22 +16,23 @@ impl Message {
                 );
                 None
             }
-        (None, Some(others)) => {
-            let mut others = others.clone();
-            others.sort();
-            let uuid_len = others[0].to_string().len();
-            let mut room_name = String::with_capacity(uuid_len);
-            for i in 0..uuid_len {
-                for user in &mut *others {
-                    room_name += user.to_string().as_bytes()[i].to_string().as_str();
-                }
+            (None, Some(others)) => {
+                let room_name = Message::group_to_string(others);
+                Some(room_name)
             }
-            Some(room_name)
-        }
-        (Some(other), None) => {
-            let (first, second) = (self.from.min(other), self.from.max(other)); Some( first .to_string() .chars() .zip(second.to_string().chars()) .flat_map(|(l, r)| vec![l, r])
-                    .collect(),
-            )
+            (Some(other), None) => {
+                let (first, second) = (
+                    self.from.clone().min(other.clone()),
+                    self.from.clone().max(other.clone()),
+                );
+                Some(
+                    first
+                        .to_string()
+                        .chars()
+                        .zip(second.to_string().chars())
+                        .flat_map(|(l, r)| vec![l, r])
+                        .collect(),
+                )
             }
             (Some(_), Some(_)) => {
                 error!("both `to_user` and `to_group` are `Some`");

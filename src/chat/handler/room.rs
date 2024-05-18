@@ -1,5 +1,6 @@
-use crate::chat::Message;
-use log::error;
+use crate::{chat::message::SocketSendable, utils::MessageDAO};
+use database::Message;
+use log::{debug, error, log};
 use serde_json::Value;
 use socketioxide::extract::{Data, SocketRef};
 
@@ -25,11 +26,12 @@ pub fn on_chat_connected(s: SocketRef, data: Data<Value>) {
 
 #[allow(clippy::needless_pass_by_value)]
 pub fn on_chat_message_received(s: SocketRef, data: Data<Value>) {
-    match &serde_json::from_value::<Message>(data.0) {
+    match serde_json::from_value::<Message>(data.0) {
         Ok(msg) => {
             if let Some(room_name) = msg.room_name() {
                 s.join(room_name.clone()).ok();
                 s.to(room_name).emit("chat-message", &msg.text).ok();
+                MessageDAO::insert(msg);
             } else {
                 error!("room name is `None`");
             }

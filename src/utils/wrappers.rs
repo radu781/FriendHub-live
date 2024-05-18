@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use uuid::Uuid;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct UuidWrapper(Uuid);
 
 impl Serialize for UuidWrapper {
